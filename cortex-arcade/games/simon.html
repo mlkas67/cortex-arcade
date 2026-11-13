@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Colour Echo</title>
+<link rel="icon" href="../assets/logo.svg">
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: #140f26; color: #f0ebff; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 18px 14px; min-height: 100dvh; }
+  h1 { font-size: 19px; margin: 0; letter-spacing: .06em; text-transform: uppercase; color: #cbb8ff; }
+  .score { font-size: 14px; color: #b9a7f5; min-height: 20px; }
+  .score b { color: #fff; }
+  #pad { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: min(330px, 78vmin); }
+  .key { aspect-ratio: 1; border: 0; border-radius: 22px; cursor: pointer; opacity: .5; transition: opacity .1s, transform .08s, box-shadow .12s; }
+  .key:disabled { cursor: default; }
+  .key[data-k="0"] { background: #ff5d7a; }
+  .key[data-k="1"] { background: #5d8bff; }
+  .key[data-k="2"] { background: #ffd166; }
+  .key[data-k="3"] { background: #5cf0b0; }
+  .key.lit { opacity: 1; transform: scale(.96); box-shadow: 0 0 0 6px rgba(255,255,255,.16), 0 0 40px 6px currentColor; }
+  .key:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+  .row { display: flex; gap: 10px; }
+  button.act { font: inherit; font-size: 14px; font-weight: 600; padding: 11px 18px; border-radius: 12px; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.08); color: #f0ebff; cursor: pointer; }
+  button.act.primary { background: #a78bfa; border-color: #a78bfa; color: #1c1330; }
+  button.act:focus-visible { outline: 3px solid #ffd166; outline-offset: 2px; }
+  .legend { font-size: 12px; color: #8d80b3; text-align: center; max-width: 330px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<h1>Colour Echo</h1>
+<div class="score" id="score" role="status">Press Start. Watch the pattern, then repeat it.</div>
+<div id="pad" aria-label="Colour pads">
+  <button class="key" type="button" data-k="0" aria-label="Red pad"></button>
+  <button class="key" type="button" data-k="1" aria-label="Blue pad"></button>
+  <button class="key" type="button" data-k="2" aria-label="Yellow pad"></button>
+  <button class="key" type="button" data-k="3" aria-label="Green pad"></button>
+</div>
+<div class="row">
+  <button class="act primary" id="start" type="button">Start</button>
+  <button class="act" id="restart" type="button">Restart</button>
+</div>
+<p class="legend">Each round adds one colour. Keys 1&#8211;4 work too. Best score: <b id="best">0</b></p>
+<script>
+(function () {
+  'use strict';
+  var keys = Array.prototype.slice.call(document.querySelectorAll('.key'));
+  var scoreEl = document.getElementById('score');
+  var bestEl = document.getElementById('best');
+  var sequence = [], inputIndex = 0, round = 0, playing = false, waiting = false;
+  var timers = [];
+  var best = 0;
+  try { best = Number(localStorage.getItem('cx_echo_best') || 0) || 0; } catch (e) { best = 0; }
+  bestEl.textContent = String(best);
+
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+  function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+
+  function flash(k, ms) {
+    var el = keys[k];
+    el.classList.add('lit');
+    later(function () { el.classList.remove('lit'); }, ms || 300);
+  }
+
+  function showSequence() {
+    waiting = false;
+    playing = true;
+    inputIndex = 0;
+    scoreEl.textContent = 'Watch: ' + sequence.length + ' step' + (sequence.length === 1 ? '' : 's');
+    var delay = 520;
+    sequence.forEach(function (k, i) {
+      later(function () { flash(k, 320); }, delay + i * 430);
+    });
+    later(function () {
+      playing = false;
+      waiting = true;
+      scoreEl.textContent = 'Your turn \u2014 repeat ' + sequence.length + '.';
+      keys.forEach(function (el) { el.disabled = false; });
+    }, delay + sequence.length * 430);
+  }
+
+  function nextRound() {
+    round++;
+    sequence.push(Math.floor(Math.random() * 4));
+    showSequence();
+  }
+
+  function press(k) {
+    if (!waiting) return;
+    flash(k, 220);
+    if (sequence[inputIndex] !== k) {
+      waiting = false;
+      playing = false;
+      keys.forEach(function (el) { el.disabled = true; });
+      scoreEl.textContent = 'Wrong colour. You reached round ' + round + '.';
+      if (round - 1 > best) {
+        best = round - 1;
+        bestEl.textContent = String(best);
+        try { localStorage.setItem('cx_echo_best', String(best)); } catch (e) {}
+      }
+      return;
+    }
+    inputIndex++;
+    if (inputIndex === sequence.length) {
+      waiting = false;
+      keys.forEach(function (el) { el.disabled = true; });
+      scoreEl.textContent = 'Nice. Next round\u2026';
+      later(nextRound, 700);
+    }
+  }
+
+  function start() {
+    clearTimers();
+    sequence = []; round = 0; inputIndex = 0;
+    keys.forEach(function (el) { el.disabled = true; });
+    later(function () { nextRound(); }, 400);
+  }
+
+  keys.forEach(function (el) {
+    el.addEventListener('click', function () { press(Number(el.dataset.k)); });
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key >= '1' && e.key <= '4' && waiting) {
+      e.preventDefault();
+      press(Number(e.key) - 1);
+    }
+    if (e.key === ' ' && !waiting && !playing) { e.preventDefault(); start(); }
+  });
+
+  document.getElementById('start').addEventListener('click', start);
+  document.getElementById('restart').addEventListener('click', function () {
+    clearTimers();
+    sequence = []; round = 0; playing = false; waiting = false;
+    keys.forEach(function (el) { el.disabled = true; });
+    scoreEl.textContent = 'Press Start. Watch the pattern, then repeat it.';
+  });
+  keys.forEach(function (el) { el.disabled = true; });
+})();
+</script>
+</body>
+</html>

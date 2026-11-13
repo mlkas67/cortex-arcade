@@ -1,6 +1,6 @@
 /* Cortex Arcade — the game catalogue.
    Add a game by pushing one object. `src` may point at a bundled file in
-   games/ (the six below) or at any URL you are allowed to embed, e.g.
+   games/ (the eleven below) or at any URL you are allowed to embed, e.g.
    { slug: 'my-game', name: 'My Game', category: 'Arcade', src: 'https://example.com/game' }.
    `portrait: true` renders the frame in a 9:16 phone-shaped stage. */
 window.CORTEX_GAMES = [
@@ -46,9 +46,44 @@ window.CORTEX_GAMES = [
     category: 'Skill',
     blurb: 'Tap the lit square as fast as you can.',
     src: 'games/reaction.html'
+  },
+  {
+    slug: 'pong',
+    name: 'Paddle Duel',
+    category: 'Arcade',
+    blurb: 'Keep the ball in play and beat the CPU.',
+    src: 'games/pong.html'
+  },
+  {
+    slug: 'mines',
+    name: 'Minefield',
+    category: 'Puzzle',
+    blurb: 'Clear a 10×10 field without setting off a mine.',
+    src: 'games/mines.html'
+  },
+  {
+    slug: 'tictactoe',
+    name: 'Three in a Row',
+    category: 'Board',
+    blurb: 'Out-think a perfect opponent, or play a friend.',
+    src: 'games/tictactoe.html'
+  },
+  {
+    slug: 'simon',
+    name: 'Colour Echo',
+    category: 'Skill',
+    blurb: 'Repeat the growing colour pattern.',
+    src: 'games/simon.html'
+  },
+  {
+    slug: 'whack',
+    name: 'Mole Rush',
+    category: 'Skill',
+    blurb: 'Thirty seconds, nine holes, one fast finger.',
+    src: 'games/whack.html'
   }
 ];
 
 /* The catalogue page groups by category and the chips are built from this list,
    so adding a new category name above is enough. */
-window.CORTEX_CATEGORIES = ['All', 'Arcade', 'Puzzle', 'Skill'];
+window.CORTEX_CATEGORIES = ['All', 'Arcade', 'Puzzle', 'Skill', 'Board'];

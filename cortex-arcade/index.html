@@ -8,62 +8,62 @@
 <link id="siteFavicon" rel="icon" href="assets/logo.svg">
 <link rel="stylesheet" href="style.css">
 </head>
-<body data-page="home">
+<body data-page="home" data-base="">
+<a class="skip-link" href="#main">Skip to content</a>
 <div class="glow glow-a"></div><div class="glow glow-b"></div>
-
-<div class="chrome-wrap">
-  <div class="chrome" role="navigation" aria-label="Cortex Arcade navigation">
-    <div class="chrome-top">
-      <div class="chrome-dots" aria-hidden="true"><i></i><i></i><i></i></div>
-      <nav class="chrome-tabs">
-        <a class="ctab active" href="index.html"><span class="ctab-icon"><img src="assets/logo.svg" alt=""></span><span>Cortex</span></a>
-        <a class="ctab" href="games.html"><span class="ctab-icon"><span aria-hidden="true">▶</span></span><span>g@m3s</span></a>
-        <a class="ctab" href="settings.html"><span class="ctab-icon" aria-hidden="true">⚙</span><span>Settings</span></a>
-      </nav>
-    </div>
-    <div class="omnibox"><span class="lock" aria-hidden="true">⌁</span><span class="url">cortex<b>·arcade</b>/home</span></div>
+<div class="nav-wrap">
+  <div class="nav" role="navigation" aria-label="Cortex Arcade navigation">
+    <div class="nav-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+    <nav class="tabs">
+      <a class="tab active" href="index.html"><span class="tab-icon"><img src="assets/logo.svg" alt=""></span><span>Cortex</span></a>
+      <a class="tab" href="games.html"><span class="tab-icon"><span class="play-mark" aria-hidden="true">▶</span></span><span>g@m3s</span></a>
+      <a class="tab" href="settings.html"><span class="tab-icon" aria-hidden="true">⚙</span><span>Settings</span></a>
+    </nav>
+    <div class="address"><span class="address-lock" aria-hidden="true">⌁</span><span class="address-text">cortex·arcade</span><span class="address-dot">•</span></div>
   </div>
 </div>
-
-<main class="home">
-  <div class="home-inner">
-    <div class="hero">
-      <div class="ring"></div><div class="ring two"></div>
-      <img src="assets/logo.svg" alt="Cortex Arcade logo">
+<main class="home" id="main">
+  <section class="home-center">
+    <div class="hero-wrap">
+      <span class="orbit" aria-hidden="true"></span>
+      <span class="orbit orbit-2" aria-hidden="true"></span>
+      <img class="hero-logo" src="assets/logo.svg" alt="Cortex Arcade logo">
     </div>
     <h1 class="wordmark">Cortex</h1>
-    <p class="tagline">Six original games, zero installs. Pick one and play.</p>
+    <p class="home-sub" id="homeTagline">ten original games, zero installs. pick one.</p>
 
-    <form class="search home-search" id="homeSearch" role="search" autocomplete="off">
+    <form class="search home-search" id="homeSearch" role="search" autocomplete="off" onsubmit="return false">
       <span class="glass" aria-hidden="true">⌕</span>
-      <input id="homeInput" type="search" placeholder="Search games…" aria-label="Search games" autocomplete="off">
+      <input id="homeInput" type="search" placeholder="Search g@m3s..." aria-label="Search games" autocomplete="off">
       <kbd>/</kbd>
     </form>
     <div class="suggest" id="homeSuggest" hidden></div>
 
-    <section class="stats" aria-label="Your visit statistics">
-      <div class="stats-head">
+    <section class="stats-card" aria-label="Your visit statistics">
+      <div class="stats-heading">
         <span>YOUR SESSION STATS</span>
-        <span class="live"><i aria-hidden="true"></i><span>LIVE</span></span>
+        <span class="stats-live"><i aria-hidden="true"></i><span>LOCAL</span></span>
       </div>
-      <div class="stats-grid">
-        <div class="cell"><span>TABS OPEN NOW</span><strong id="statNow">1</strong><small>this browser, updated live</small></div>
-        <div class="cell"><span>BUSIEST TODAY</span><strong id="statPeak">1</strong><small>most tabs open at once</small></div>
-        <div class="cell"><span>DAYS VISITED</span><strong id="statTotal">1</strong><small>days you opened the arcade</small></div>
+      <div class="stats-metrics">
+        <div class="stats-metric"><span class="stats-label">TABS OPEN</span><strong id="statNow">1</strong><small>this browser, right now</small></div>
+        <div class="stats-divider" aria-hidden="true"></div>
+        <div class="stats-metric"><span class="stats-label">BUSIEST</span><strong id="statPeak">1</strong><small>most tabs at once today</small></div>
+        <div class="stats-divider" aria-hidden="true"></div>
+        <div class="stats-metric stats-metric--third"><span class="stats-label">DAYS VISITED</span><strong id="statTotal">1</strong><small>days you opened the arcade</small></div>
       </div>
-      <div class="stats-foot">Counted locally on this device (<span id="statDay">today</span>). This is a static site, so these are your own numbers, not a worldwide total.</div>
+      <div class="stats-foot">Counted locally in this browser (<span id="statDay">today</span>). The site is static, so these are your numbers, not a worldwide total.</div>
     </section>
 
     <div class="home-links">
-      <a href="games.html">Browse all games →</a>
-      <a href="settings.html">Dress up the tab →</a>
+      <a href="games.html">Browse all g@m3s →</a>
+      <a href="settings.html">Dress up the tab</a>
     </div>
-  </div>
+  </section>
 </main>
 
 <footer class="foot">
   <span>Cortex Arcade — an original browser arcade.</span>
-  <span>Made by Lemon Code</span>
+  <span><a href="games.html">All games</a> · <a href="settings.html">Settings</a></span>
 </footer>
 
 <script src="js/catalog.js"></script>

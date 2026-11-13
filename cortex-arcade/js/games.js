@@ -25,16 +25,23 @@
 
   function cardHtml(game) {
     var isRandom = game.slug === '__random';
-    var href = isRandom ? '#' : window.CortexSearch.playUrl(game);
-    return '<article class="card" data-slug="' + esc(game.slug) + '">' +
-      '<a class="thumb" href="' + href + '" aria-label="Play ' + esc(game.name) + '">' +
-        '<span class="mono" aria-hidden="true">' + esc(isRandom ? '?' : initials(game.name)) + '</span>' +
-        '<span class="badge">' + esc(game.category.toUpperCase()) + '</span>' +
+    var href = isRandom ? '#random' : window.CortexSearch.playUrl(game);
+    var thumb = isRandom
+      ? '<span class="random-mark" aria-hidden="true">?</span>'
+      : '<img src="assets/thumbs/' + esc(game.slug) + '.svg" alt="" loading="lazy" ' +
+        'onerror="this.remove();this.parentNode.classList.add(\'no-thumb\')">' +
+        '<span class="thumb-mono" aria-hidden="true">' + esc(initials(game.name)) + '</span>';
+    return '<article class="card' + (isRandom ? ' random-card' : '') + '" data-slug="' + esc(game.slug) + '">' +
+      '<a class="thumb" href="' + href + '" aria-label="' + (isRandom ? 'Pick a random game' : 'Play ' + esc(game.name)) + '">' +
+        thumb +
+        '<span class="thumb-shine" aria-hidden="true"></span>' +
+        '<span class="card-badge">' + esc(isRandom ? 'SURPRISE' : game.category.toUpperCase()) + '</span>' +
       '</a>' +
       '<div class="card-body">' +
-        '<div class="card-name">' + esc(game.name) + '</div>' +
-        '<div class="card-meta">' + esc(game.blurb || '') + '</div>' +
-        '<div class="card-actions"><a class="btn btn-primary" href="' + href + '">' + (isRandom ? 'Pick one' : 'Play') + '</a></div>' +
+        '<div class="card-name">' + esc(game.name) +
+          '<span>' + esc(isRandom ? 'Let the arcade choose for you.' : (game.blurb || '')) + '</span>' +
+        '</div>' +
+        '<a class="play" href="' + href + '">' + (isRandom ? 'Pick one' : 'Play') + '</a>' +
       '</div>' +
     '</article>';
   }
