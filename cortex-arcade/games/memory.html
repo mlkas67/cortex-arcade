@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="../assets/logo.svg">
+<title>Memory Match</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: #0a0710; color: #fff; font-family: Inter, system-ui, sans-serif; }
+  .app { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 16px; }
+  .top { width: min(94vw, 640px); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .stats { display: flex; gap: 8px; }
+  .stat { background: #171326; border: 1px solid #ffffff1f; border-radius: 12px; padding: 7px 14px; text-align: center; }
+  .stat span { display: block; font-size: 10px; letter-spacing: .12em; color: #928aa8; }
+  .stat b { font-size: 18px; }
+  button { border: 0; border-radius: 11px; font: inherit; font-size: 13px; font-weight: 700; padding: 10px 16px; cursor: pointer; background: #ff3d9f; color: #fff; }
+  button.ghost { background: #1b1728; color: #ded7ec; border: 1px solid #ffffff1f; }
+  button:hover { filter: brightness(1.1); }
+  .sizes { display: flex; gap: 6px; }
+  .sizes button { padding: 8px 12px; font-size: 12px; }
+  .sizes button.on { background: #ff3d9f; color: #fff; }
+  .grid { width: min(94vw, 640px); display: grid; gap: 10px; }
+  .tile { position: relative; aspect-ratio: 1; border-radius: 14px; background: #1b1728; border: 1px solid #ffffff1f; display: grid; place-items: center; font-size: clamp(18px, 7vw, 34px); cursor: pointer; transition: transform .16s, background .16s; }
+  .tile:hover { transform: translateY(-3px); }
+  .tile .face { opacity: 0; transform: scale(.6); transition: opacity .18s, transform .18s; }
+  .tile.flip { background: linear-gradient(150deg, #2a1f47, #1a1428); border-color: #ff3d9f66; }
+  .tile.flip .face { opacity: 1; transform: scale(1); }
+  .tile.done { background: linear-gradient(150deg, #0d3d2a, #0b2419); border-color: #36d48b88; cursor: default; }
+  .tile.done:hover { transform: none; }
+  .status { color: #a79fbc; font-size: 13px; min-height: 20px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="stats">
+      <div class="stat"><span>MOVES</span><b id="moves">0</b></div>
+      <div class="stat"><span>PAIRS</span><b id="pairs">0</b></div>
+      <div class="stat"><span>TIME</span><b id="time">0:00</b></div>
+    </div>
+    <div class="sizes">
+      <button class="ghost" data-size="4" type="button">4×4</button>
+      <button class="ghost" data-size="6" type="button">6×6</button>
+      <button type="button" id="newGame">New game</button>
+    </div>
+  </div>
+  <div class="grid" id="grid" aria-label="Memory board"></div>
+  <div class="status" id="status">Flip two tiles to find a pair.</div>
+</div>
+<script>
+(function () {
+  'use strict';
+  var grid = document.getElementById('grid');
+  var movesEl = document.getElementById('moves');
+  var pairsEl = document.getElementById('pairs');
+  var timeEl = document.getElementById('time');
+  var statusEl = document.getElementById('status');
+  var size = 4;
+  var deck = [];
+  var first = null;
+  var lock = false;
+  var moves = 0, found = 0, seconds = 0, timer = null, started = false;
+
+  var FACES = ['🧠', '🎮', '🚀', '⚡', '🎧', '🧩', '🕹️', '🌈', '🔥', '💎', '🍕', '🐙', '🌙', '🎲', '🧿', '🛸', '🍄', '🐲'];
+
+  function startTimer() {
+    if (started) return;
+    started = true;
+    timer = setInterval(function () {
+      seconds += 1;
+      var m = Math.floor(seconds / 60);
+      var s = seconds % 60;
+      timeEl.textContent = m + ':' + (s < 10 ? '0' + s : s);
+    }, 1000);
+  }
+
+  function shuffle(list) {
+    for (var i = list.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = list[i]; list[i] = list[j]; list[j] = t;
+    }
+    return list;
+  }
+
+  function build() {
+    clearInterval(timer);
+    started = false;
+    seconds = 0;
+    timeEl.textContent = '0:00';
+    moves = 0; found = 0;
+    movesEl.textContent = '0';
+    pairsEl.textContent = '0';
+    first = null;
+    lock = false;
+    statusEl.textContent = 'Flip two tiles to find a pair.';
+
+    var pairCount = (size * size) / 2;
+    var pool = FACES.slice(0, pairCount);
+    deck = shuffle(pool.concat(pool));
+    grid.style.gridTemplateColumns = 'repeat(' + size + ', minmax(0, 1fr))';
+    grid.innerHTML = deck.map(function (face, i) {
+      return '<div class="tile" data-i="' + i + '" role="button" tabindex="0" aria-label="Hidden tile"><span class="face">' + face + '</span></div>';
+    }).join('');
+    document.querySelectorAll('[data-size]').forEach(function (btn) {
+      btn.classList.toggle('on', Number(btn.dataset.size) === size);
+    });
+  }
+
+  grid.addEventListener('click', function (e) {
+    var tile = e.target.closest('.tile');
+    if (!tile) return;
+    flip(tile);
+  });
+
+  grid.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    var tile = e.target.closest('.tile');
+    if (!tile) return;
+    e.preventDefault();
+    flip(tile);
+  });
+
+  function flip(tile) {
+    if (lock || tile.classList.contains('flip') || tile.classList.contains('done')) return;
+    startTimer();
+    tile.classList.add('flip');
+    tile.setAttribute('aria-label', 'Revealed tile');
+    if (!first) { first = tile; return; }
+
+    moves += 1;
+    movesEl.textContent = String(moves);
+    var a = deck[Number(first.dataset.i)];
+    var b = deck[Number(tile.dataset.i)];
+
+    if (a === b) {
+      first.classList.add('done');
+      tile.classList.add('done');
+      first = null;
+      found += 1;
+      pairsEl.textContent = String(found);
+      if (found === deck.length / 2) {
+        clearInterval(timer);
+        statusEl.textContent = 'Solved in ' + moves + ' moves and ' + timeEl.textContent + '. Well done.';
+      }
+    } else {
+      lock = true;
+      var a2 = first, b2 = tile;
+      first = null;
+      setTimeout(function () {
+        a2.classList.remove('flip');
+        b2.classList.remove('flip');
+        a2.setAttribute('aria-label', 'Hidden tile');
+        b2.setAttribute('aria-label', 'Hidden tile');
+        lock = false;
+      }, 640);
+    }
+  }
+
+  document.querySelectorAll('[data-size]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      size = Number(btn.dataset.size);
+      build();
+    });
+  });
+
+  document.getElementById('newGame').addEventListener('click', build);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'r' || e.key === 'R') build();
+  });
+
+  build();
+})();
+</script>
+</body>
+</html>

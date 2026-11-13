@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>g@m3s · Cortex Arcade</title>
+<link id="siteFavicon" rel="icon" href="assets/logo.svg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="games">
+<div class="glow glow-a"></div><div class="glow glow-b"></div>
+
+<div class="chrome-wrap">
+  <div class="chrome" role="navigation" aria-label="Cortex Arcade navigation">
+    <div class="chrome-top">
+      <div class="chrome-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+      <nav class="chrome-tabs">
+        <a class="ctab" href="index.html"><span class="ctab-icon"><img src="assets/logo.svg" alt=""></span><span>Cortex</span></a>
+        <a class="ctab active" href="games.html"><span class="ctab-icon"><span aria-hidden="true">▶</span></span><span>g@m3s</span></a>
+        <a class="ctab" href="settings.html"><span class="ctab-icon" aria-hidden="true">⚙</span><span>Settings</span></a>
+      </nav>
+    </div>
+    <div class="omnibox"><span class="lock" aria-hidden="true">⌁</span><span class="url">cortex<b>·arcade</b>/games</span></div>
+  </div>
+</div>
+
+<main class="wrap">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Browser arcade</div>
+      <h1>g@m3s</h1>
+      <p class="lead">Pick something and jump straight in. Nothing to install.</p>
+    </div>
+    <form class="search" id="gamesSearch" role="search" autocomplete="off">
+      <span class="glass" aria-hidden="true">⌕</span>
+      <input id="gamesInput" type="search" placeholder="Search games…" aria-label="Search games" autocomplete="off">
+      <kbd>/</kbd>
+    </form>
+  </div>
+
+  <div class="suggest" id="gamesSuggest" hidden></div>
+  <div class="chips" id="chips" role="tablist" aria-label="Filter by category"></div>
+  <section class="grid" id="grid" aria-live="polite"></section>
+</main>
+
+<footer class="foot">
+  <span>Cortex Arcade — an original browser arcade.</span>
+  <span><a href="index.html">Home</a> · <a href="settings.html">Settings</a></span>
+</footer>
+
+<script src="js/catalog.js"></script>
+<script src="js/core.js"></script>
+<script src="js/search.js"></script>
+<script src="js/games.js"></script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cortex Arcade</title>
+<meta name="description" content="Cortex Arcade — a fast browser arcade with original games you can play instantly.">
+<link id="siteFavicon" rel="icon" href="assets/logo.svg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="home">
+<div class="glow glow-a"></div><div class="glow glow-b"></div>
+
+<div class="chrome-wrap">
+  <div class="chrome" role="navigation" aria-label="Cortex Arcade navigation">
+    <div class="chrome-top">
+      <div class="chrome-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+      <nav class="chrome-tabs">
+        <a class="ctab active" href="index.html"><span class="ctab-icon"><img src="assets/logo.svg" alt=""></span><span>Cortex</span></a>
+        <a class="ctab" href="games.html"><span class="ctab-icon"><span aria-hidden="true">▶</span></span><span>g@m3s</span></a>
+        <a class="ctab" href="settings.html"><span class="ctab-icon" aria-hidden="true">⚙</span><span>Settings</span></a>
+      </nav>
+    </div>
+    <div class="omnibox"><span class="lock" aria-hidden="true">⌁</span><span class="url">cortex<b>·arcade</b>/home</span></div>
+  </div>
+</div>
+
+<main class="home">
+  <div class="home-inner">
+    <div class="hero">
+      <div class="ring"></div><div class="ring two"></div>
+      <img src="assets/logo.svg" alt="Cortex Arcade logo">
+    </div>
+    <h1 class="wordmark">Cortex</h1>
+    <p class="tagline">Six original games, zero installs. Pick one and play.</p>
+
+    <form class="search home-search" id="homeSearch" role="search" autocomplete="off">
+      <span class="glass" aria-hidden="true">⌕</span>
+      <input id="homeInput" type="search" placeholder="Search games…" aria-label="Search games" autocomplete="off">
+      <kbd>/</kbd>
+    </form>
+    <div class="suggest" id="homeSuggest" hidden></div>
+
+    <section class="stats" aria-label="Your visit statistics">
+      <div class="stats-head">
+        <span>YOUR SESSION STATS</span>
+        <span class="live"><i aria-hidden="true"></i><span>LIVE</span></span>
+      </div>
+      <div class="stats-grid">
+        <div class="cell"><span>TABS OPEN NOW</span><strong id="statNow">1</strong><small>this browser, updated live</small></div>
+        <div class="cell"><span>BUSIEST TODAY</span><strong id="statPeak">1</strong><small>most tabs open at once</small></div>
+        <div class="cell"><span>DAYS VISITED</span><strong id="statTotal">1</strong><small>days you opened the arcade</small></div>
+      </div>
+      <div class="stats-foot">Counted locally on this device (<span id="statDay">today</span>). This is a static site, so these are your own numbers, not a worldwide total.</div>
+    </section>
+
+    <div class="home-links">
+      <a href="games.html">Browse all games →</a>
+      <a href="settings.html">Dress up the tab →</a>
+    </div>
+  </div>
+</main>
+
+<footer class="foot">
+  <span>Cortex Arcade — an original browser arcade.</span>
+  <span>Made by Lemon Code</span>
+</footer>
+
+<script src="js/catalog.js"></script>
+<script src="js/core.js"></script>
+<script src="js/search.js"></script>
+<script src="js/home.js"></script>
+</body>
+</html>
