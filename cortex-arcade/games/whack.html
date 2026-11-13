@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mole Rush</title>
+<link rel="icon" href="../assets/logo.svg">
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: #241206; color: #fff4e8; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 16px 12px; min-height: 100dvh; }
+  .top { display: flex; gap: 22px; align-items: flex-end; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: #f0b98a; }
+  .top b { display: block; font-size: 24px; letter-spacing: 0; color: #fff; }
+  #field { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: min(420px, 88vmin); }
+  .hole { position: relative; aspect-ratio: 1 / .92; border-radius: 16px; background: radial-gradient(ellipse at 50% 82%, #120a05 0 46%, #3a1f0e 47%, #2b1608 100%); border: 1px solid rgba(255,255,255,.08); overflow: hidden; cursor: pointer; }
+  .hole:focus-visible { outline: 3px solid #ffd166; outline-offset: 3px; }
+  .mole { position: absolute; left: 50%; bottom: -14%; width: 62%; height: 62%; transform: translate(-50%, 115%); transition: transform .11s ease-out; border-radius: 48% 48% 40% 40%; background: linear-gradient(180deg, #c08a58, #8d5a32); display: grid; place-items: center; font-size: 26px; }
+  .hole.up .mole { transform: translate(-50%, 8%); }
+  .hole.hit .mole { transform: translate(-50%, 30%) scale(.9); filter: brightness(1.6); }
+  .mole::before { content: '\2022 \2022'; letter-spacing: .22em; font-size: 15px; color: #241206; transform: translateY(-6px); }
+  .gold .mole { background: linear-gradient(180deg, #ffe066, #e0a52a); }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; }
+  button { font: inherit; font-size: 14px; font-weight: 700; padding: 11px 20px; border-radius: 12px; border: 0; background: #fb923c; color: #2a1405; cursor: pointer; }
+  button.ghost { background: rgba(255,255,255,.1); color: #fff4e8; }
+  button:focus-visible { outline: 3px solid #ffd166; outline-offset: 2px; }
+  .msg { min-height: 20px; font-size: 14px; color: #ffcfa6; }
+</style>
+</head>
+<body>
+<div class="top">
+  <div>Score<b id="score">0</b></div>
+  <div>Time<b id="time">30</b></div>
+  <div>Best<b id="best">0</b></div>
+</div>
+<div id="field" aria-label="Mole field"></div>
+<div class="row">
+  <button id="start" type="button">Start 30s round</button>
+  <button id="hard" class="ghost" type="button">Speed: normal</button>
+</div>
+<p class="msg" id="msg" role="status">Tap a mole before it ducks back down. Gold moles are worth three.</p>
+<script>
+(function () {
+  'use strict';
+  var field = document.getElementById('field');
+  var scoreEl = document.getElementById('score');
+  var timeEl = document.getElementById('time');
+  var bestEl = document.getElementById('best');
+  var msg = document.getElementById('msg');
+  var hardBtn = document.getElementById('hard');
+  var holes = [], score = 0, left = 30, running = false, fast = false;
+  var tick = 0, spawner = 0, timer = 0, best = 0;
+  try { best = Number(localStorage.getItem('cx_mole_best') || 0) || 0; } catch (e) { best = 0; }
+  bestEl.textContent = String(best);
+
+  for (var i = 0; i < 9; i++) {
+    var h = document.createElement('div');
+    h.className = 'hole';
+    h.tabIndex = 0;
+    h.setAttribute('role', 'button');
+    h.setAttribute('aria-label', 'Hole ' + (i + 1));
+    h.innerHTML = '<span class="mole" aria-hidden="true"></span>';
+    field.appendChild(h);
+    holes.push({ el: h, up: false, gold: false, timer: 0 });
+  }
+
+  function clearHoles() {
+    holes.forEach(function (hole) {
+      clearTimeout(hole.timer);
+      hole.up = false;
+      hole.gold = false;
+      hole.el.classList.remove('up', 'hit', 'gold');
+    });
+  }
+
+  function pop(hole) {
+    if (!running) return;
+    hole.up = true;
+    hole.gold = Math.random() < 0.14;
+    hole.el.classList.toggle('gold', hole.gold);
+    hole.el.classList.add('up');
+    var life = (fast ? 720 : 950) + Math.random() * 420;
+    hole.timer = setTimeout(function () {
+      hole.up = false;
+      hole.el.classList.remove('up', 'gold');
+    }, life);
+  }
+
+  function spawn() {
+    if (!running) return;
+    var free = holes.filter(function (h) { return !h.up; });
+    if (free.length) pop(free[Math.floor(Math.random() * free.length)]);
+    if (Math.random() < (fast ? 0.55 : 0.35)) {
+      var more = holes.filter(function (h) { return !h.up; });
+      if (more.length > 3) pop(more[Math.floor(Math.random() * more.length)]);
+    }
+  }
+
+  function hit(hole) {
+    if (!running || !hole.up) return;
+    hole.up = false;
+    clearTimeout(hole.timer);
+    hole.el.classList.remove('up', 'gold');
+    hole.el.classList.add('hit');
+    setTimeout(function () { hole.el.classList.remove('hit'); }, 130);
+    score += hole.gold ? 3 : 1;
+    scoreEl.textContent = String(score);
+  }
+
+  holes.forEach(function (hole) {
+    hole.el.addEventListener('pointerdown', function (e) { e.preventDefault(); hit(hole); });
+    hole.el.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); hit(hole); }
+    });
+  });
+
+  function stop() {
+    running = false;
+    clearInterval(tick); clearInterval(spawner); clearTimeout(timer);
+    clearHoles();
+    if (score > best) {
+      best = score;
+      bestEl.textContent = String(best);
+      try { localStorage.setItem('cx_mole_best', String(best)); } catch (e) {}
+      msg.textContent = 'New best: ' + score + ' points.';
+    } else {
+      msg.textContent = 'Round over \u2014 ' + score + ' points.';
+    }
+    document.getElementById('start').textContent = 'Play again';
+  }
+
+  function start() {
+    clearInterval(tick); clearInterval(spawner); clearTimeout(timer);
+    clearHoles();
+    score = 0; left = 30; running = true;
+    scoreEl.textContent = '0';
+    timeEl.textContent = '30';
+    msg.textContent = 'Go!';
+    spawner = setInterval(spawn, fast ? 420 : 620);
+    tick = setInterval(function () {
+      left--;
+      timeEl.textContent = left < 0 ? '0' : String(left);
+      if (left <= 0) stop();
+    }, 1000);
+    spawn();
+  }
+
+  document.getElementById('start').addEventListener('click', start);
+  hardBtn.addEventListener('click', function () {
+    fast = !fast;
+    hardBtn.textContent = 'Speed: ' + (fast ? 'fast' : 'normal');
+  });
+})();
+</script>
+</body>
+</html>

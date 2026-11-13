@@ -24,7 +24,7 @@
   }
 
   function markIcons() {
-    var saved = store.get('cx_tab_icon', '');
+    var saved = store.get('cx_tab_icon', '') || 'assets/logo.svg';
     document.querySelectorAll('.icon-btn').forEach(function (btn) {
       btn.classList.toggle('on', btn.dataset.icon === saved);
     });

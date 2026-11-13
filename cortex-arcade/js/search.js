@@ -35,9 +35,9 @@
         return;
       }
       container.innerHTML = list.map(function (game, i) {
-        return '<div class="suggest-row" data-index="' + i + '" role="option">' +
+        return '<a class="suggest-row" data-index="' + i + '" role="option" href="' + playUrl(game) + '">' +
           '<span><strong>' + escapeHtml(game.name) + '</strong> <small>· ' + escapeHtml(game.category) + '</small></span>' +
-          '<small>Enter ⏎</small></div>';
+          '<small>Play →</small></a>';
       }).join('');
       container.hidden = false;
       rows = list;
@@ -65,7 +65,7 @@
       if (!rows.length) return;
       activeIndex = (activeIndex + delta + rows.length) % rows.length;
       container.querySelectorAll('.suggest-row').forEach(function (row, i) {
-        row.style.background = i === activeIndex ? 'var(--surface-3)' : '';
+        row.classList.toggle('on', i === activeIndex);
       });
     }
 

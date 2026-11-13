@@ -1,23 +1,30 @@
 # Cortex Arcade
 
-A small browser-arcade site dressed up as a browser window: fake tabs, an omnibox,
-a themed background and a catalogue of six self-contained games. Everything is plain
-HTML, CSS and JavaScript — no build step, no dependencies, no network calls.
+A small browser-arcade site dressed up as a browser window: glossy tabs, a fake
+omnibox, neon glow, falling balls and a catalogue of eleven self-contained games.
+Everything is plain HTML, CSS and JavaScript — no build step, no dependencies, no
+network calls.
 
 ## Pages
 
 | File | What it is |
 | --- | --- |
-| `index.html` | Home: hero, search with suggestions, local session stats |
+| `index.html` | Home: hero logo, search with suggestions, local session stats |
 | `games.html` | Full catalogue: category chips, live search, Random card |
 | `play.html?g=<slug>` | Play shell: game title, Reload, Fullscreen, iframe stage |
 | `settings.html` | Themes, tab title/icon dressing, background and suggestion toggles |
 
 ## Games
 
-`games/snake.html`, `2048.html`, `breakout.html`, `flappy.html`, `memory.html`,
-`reaction.html`. Each is a standalone page (own canvas, own input handling) so it can be
-opened directly or embedded in any other page.
+`games/snake.html` (Neon Snake), `2048.html`, `breakout.html` (Brick Breaker),
+`flappy.html` (Flappy Dart), `memory.html` (Memory Match), `reaction.html`
+(Reaction Grid), `pong.html` (Paddle Duel), `mines.html` (Minefield),
+`tictactoe.html` (Three in a Row), `simon.html` (Colour Echo) and `whack.html`
+(Mole Rush). Each is a standalone page (own canvas or grid, own input handling) so it
+can be opened directly or embedded in any other page.
+
+Cards show `assets/thumbs/<slug>.svg`; if a thumbnail is missing the card falls back
+to the game's initials, so adding a game never leaves a broken image.
 
 ## Run it
 

@@ -4,62 +4,61 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Settings · Cortex Arcade</title>
+<meta name="description" content="Theme, tab title and tab icon for Cortex Arcade.">
 <link id="siteFavicon" rel="icon" href="assets/logo.svg">
 <link rel="stylesheet" href="style.css">
 </head>
-<body data-page="settings">
+<body data-page="settings" data-base="">
+<a class="skip-link" href="#main">Skip to content</a>
 <div class="glow glow-a"></div><div class="glow glow-b"></div>
-
-<div class="chrome-wrap">
-  <div class="chrome" role="navigation" aria-label="Cortex Arcade navigation">
-    <div class="chrome-top">
-      <div class="chrome-dots" aria-hidden="true"><i></i><i></i><i></i></div>
-      <nav class="chrome-tabs">
-        <a class="ctab" href="index.html"><span class="ctab-icon"><img src="assets/logo.svg" alt=""></span><span>Cortex</span></a>
-        <a class="ctab" href="games.html"><span class="ctab-icon"><span aria-hidden="true">▶</span></span><span>g@m3s</span></a>
-        <a class="ctab active" href="settings.html"><span class="ctab-icon" aria-hidden="true">⚙</span><span>Settings</span></a>
-      </nav>
-    </div>
-    <div class="omnibox"><span class="lock" aria-hidden="true">⌁</span><span class="url">cortex<b>·arcade</b>/settings</span></div>
+<div class="nav-wrap">
+  <div class="nav" role="navigation" aria-label="Cortex Arcade navigation">
+    <div class="nav-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+    <nav class="tabs">
+      <a class="tab" href="index.html"><span class="tab-icon"><img src="assets/logo.svg" alt=""></span><span>Cortex</span></a>
+      <a class="tab" href="games.html"><span class="tab-icon"><span class="play-mark" aria-hidden="true">▶</span></span><span>g@m3s</span></a>
+      <a class="tab active" href="settings.html"><span class="tab-icon" aria-hidden="true">⚙</span><span>Settings</span></a>
+    </nav>
+    <div class="address"><span class="address-lock" aria-hidden="true">⌁</span><span class="address-text">cortex·arcade</span><span class="address-dot">•</span></div>
   </div>
 </div>
+<main class="settings-main" id="main">
+  <div class="eyebrow">Customisation</div>
+  <h1 class="page-title">Settings</h1>
+  <p class="page-note">Pick a colour theme, dress up the browser tab, and choose how the background behaves.</p>
 
-<main class="wrap" style="max-width:880px">
-  <div class="eyebrow">Customization</div>
-  <h1>Settings</h1>
-  <p class="lead">Change the tab title and icon, pick a colour theme, and choose how the background behaves.</p>
-
-  <section class="panel" style="margin-top:24px">
+  <section class="card-panel">
     <label class="field">Tab title
       <input id="tabTitle" type="text" maxlength="80" placeholder="Cortex Arcade" autocomplete="off">
     </label>
-    <p class="help">Shown in the browser tab on every page of the arcade.</p>
+    <p class="help">Shown in the browser tab on every page of the arcade. Leave it empty for the default.</p>
 
-    <label class="field" style="margin-top:18px">Colour theme</label>
+    <span class="field">Colour theme</span>
     <div class="theme-grid" role="group" aria-label="Colour themes">
-      <button type="button" class="theme-btn" data-theme-choice="pink"><i class="swatch" style="background:#ff3d9f"></i><span>Pink</span></button>
-      <button type="button" class="theme-btn" data-theme-choice="purple"><i class="swatch" style="background:#a86bff"></i><span>Purple</span></button>
-      <button type="button" class="theme-btn" data-theme-choice="blue"><i class="swatch" style="background:#39a8ff"></i><span>Blue</span></button>
-      <button type="button" class="theme-btn" data-theme-choice="green"><i class="swatch" style="background:#36d48b"></i><span>Green</span></button>
-      <button type="button" class="theme-btn" data-theme-choice="orange"><i class="swatch" style="background:#ff8a2a"></i><span>Orange</span></button>
-      <button type="button" class="theme-btn" data-theme-choice="mono"><i class="swatch" style="background:#ededed"></i><span>Mono</span></button>
+      <button type="button" class="theme-btn" data-theme-choice="pink"><i class="swatch" style="background:linear-gradient(135deg,#ff3d9f,#8c2dff)"></i><span>Pink</span></button>
+      <button type="button" class="theme-btn" data-theme-choice="purple"><i class="swatch" style="background:linear-gradient(135deg,#a86bff,#6231ff)"></i><span>Purple</span></button>
+      <button type="button" class="theme-btn" data-theme-choice="blue"><i class="swatch" style="background:linear-gradient(135deg,#39a8ff,#4169ff)"></i><span>Blue</span></button>
+      <button type="button" class="theme-btn" data-theme-choice="green"><i class="swatch" style="background:linear-gradient(135deg,#36d48b,#20a86a)"></i><span>Green</span></button>
+      <button type="button" class="theme-btn" data-theme-choice="orange"><i class="swatch" style="background:linear-gradient(135deg,#ff8a2a,#f0522b)"></i><span>Orange</span></button>
+      <button type="button" class="theme-btn" data-theme-choice="mono"><i class="swatch" style="background:linear-gradient(135deg,#ececec,#666)"></i><span>Mono</span></button>
     </div>
 
-    <label class="field" style="margin-top:18px">Tab icon presets</label>
+    <span class="field">Tab icon presets</span>
     <div class="icon-grid" role="group" aria-label="Preset tab icons">
       <button type="button" class="icon-btn" data-icon="assets/icon-drive.svg" data-icon-name="Drive"><img src="assets/icon-drive.svg" alt=""><span>Drive</span></button>
       <button type="button" class="icon-btn" data-icon="assets/icon-classroom.svg" data-icon-name="Class"><img src="assets/icon-classroom.svg" alt=""><span>Class</span></button>
       <button type="button" class="icon-btn" data-icon="assets/icon-docs.svg" data-icon-name="Docs"><img src="assets/icon-docs.svg" alt=""><span>Docs</span></button>
       <button type="button" class="icon-btn" data-icon="assets/icon-music.svg" data-icon-name="Music"><img src="assets/icon-music.svg" alt=""><span>Music</span></button>
+      <button type="button" class="icon-btn on" data-icon="assets/logo.svg" data-icon-name="Cortex"><img src="assets/logo.svg" alt=""><span>Cortex</span></button>
     </div>
 
-    <label class="field" style="margin-top:18px">Custom tab icon
+    <label class="field">Custom tab icon
       <input id="tabIcon" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml,image/x-icon">
     </label>
-    <p class="help">Preset icons apply immediately. An uploaded image is saved to this browser when you press Save and replaces the icon on every page. The default is the Cortex logo.</p>
+    <p class="help">A preset applies immediately. An uploaded image is stored in this browser when you press Save, and then shows on every page. The default is the Cortex logo.</p>
   </section>
 
-  <section class="panel">
+  <section class="card-panel">
     <div class="switch-row">
       <div><strong>Falling balls background</strong><p>Slow drifting neon balls behind the page.</p></div>
       <button type="button" class="toggle" id="toggleBalls" role="switch" aria-checked="true" aria-label="Falling balls background"></button>
