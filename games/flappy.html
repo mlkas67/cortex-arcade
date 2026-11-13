@@ -42,6 +42,7 @@
     score = 0;
     spawnTimer = 0;
     groundOffset = 0;
+    paused = false;
     state = 'ready';
     scoreEl.textContent = '0';
     addPipe(W + 60);
@@ -56,20 +57,30 @@
   }
 
   function flap() {
+    paused = false;
     if (state === 'ready') state = 'play';
     if (state === 'play') { bird.v = FLAP; bird.spin = -0.35; }
     else if (state === 'dead') reset();
   }
 
-  var raf = null;
+  var raf = null, paused = false;
+  // Fixed 60 Hz step so high-refresh screens do not speed the game up.
+  var STEP = 1000 / 60, acc = 0, lastT = 0;
   function loop() {
     cancelAnimationFrame(raf);
-    function frame() {
-      update();
+    acc = 0;
+    lastT = performance.now();
+    function frame(t) {
+      var dt = Math.min(250, t - lastT);
+      lastT = t;
+      if (!paused) {
+        acc += dt;
+        while (acc >= STEP) { update(); acc -= STEP; }
+      }
       draw();
       raf = requestAnimationFrame(frame);
     }
-    frame();
+    raf = requestAnimationFrame(frame);
   }
 
   function update() {
@@ -223,6 +234,9 @@
   document.addEventListener('keydown', function (e) {
     if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'w') { e.preventDefault(); flap(); }
     if (e.key === 'r' || e.key === 'R') reset();
+  });
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden && state === 'play') paused = true;
   });
   cv.addEventListener('mousedown', flap);
   cv.addEventListener('touchstart', function (e) { e.preventDefault(); flap(); }, { passive: false });

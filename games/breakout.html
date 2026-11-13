@@ -201,13 +201,24 @@
     ctx.closePath();
   }
 
+  // Physics runs on a fixed 60 Hz step so 120/144 Hz screens play the same
+  // speed as 60 Hz ones.
+  var STEP = 1000 / 60, acc = 0, lastT = 0;
   function loop() {
     cancelAnimationFrame(raf);
-    function frame() {
-      if (running && !paused) { update(); draw(); }
+    acc = 0;
+    lastT = performance.now();
+    function frame(t) {
+      var dt = Math.min(250, t - lastT);
+      lastT = t;
+      if (running && !paused) {
+        acc += dt;
+        while (acc >= STEP) { update(); acc -= STEP; }
+        draw();
+      }
       raf = requestAnimationFrame(frame);
     }
-    frame();
+    raf = requestAnimationFrame(frame);
   }
 
   function finish(title, text) {
@@ -245,6 +256,11 @@
   document.addEventListener('keyup', function (e) {
     if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
     if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
+  });
+  window.addEventListener('blur', function () { keys.left = false; keys.right = false; });
+  document.addEventListener('visibilitychange', function () {
+    keys.left = false; keys.right = false;
+    if (document.hidden && running && !paused) togglePause();
   });
 
   function pointerMove(clientX) {

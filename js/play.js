@@ -33,6 +33,16 @@
   if (game.portrait) stage.classList.add('portrait');
   frame.src = game.src;
 
+  // Games listen for keys on their own document, so the frame needs focus or
+  // nothing happens until the player clicks inside it.
+  function focusGame() {
+    try { frame.focus({ preventScroll: true }); } catch (e) { frame.focus(); }
+  }
+
+  frame.addEventListener('load', function () { focusGame(); });
+  stage.addEventListener('pointerdown', focusGame);
+  frame.addEventListener('mouseenter', focusGame);
+
   document.getElementById('playReload').addEventListener('click', function () {
     frame.src = game.src;
     window.Cortex.toast('Reloaded ' + game.name);
