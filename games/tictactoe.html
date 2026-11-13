@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Three in a Row</title>
+<link rel="icon" href="../assets/logo.svg">
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: #1b0d18; color: #ffe9f4; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 20px 14px; min-height: 100dvh; }
+  h1 { font-size: 20px; margin: 0; letter-spacing: .04em; }
+  #board { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; width: min(340px, 82vmin); }
+  .slot { aspect-ratio: 1; border-radius: 16px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.05); display: grid; place-items: center; font-size: min(15vmin, 62px); font-weight: 800; cursor: pointer; line-height: 1; }
+  .slot:hover:not(.taken) { background: rgba(255,255,255,.1); }
+  .slot.x { color: #ffd166; }
+  .slot.o { color: #7cf5c4; }
+  .slot.win { background: rgba(124,245,196,.18); border-color: rgba(124,245,196,.7); }
+  .slot:focus-visible { outline: 3px solid #ff9ec7; outline-offset: 3px; }
+  .status { font-size: 15px; min-height: 22px; color: #ffc6e0; }
+  .row { display: flex; gap: 10px; }
+  button { font: inherit; font-size: 14px; font-weight: 600; padding: 10px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.07); color: #ffe9f4; cursor: pointer; }
+  button.on { background: #ff7ab8; border-color: #ff7ab8; color: #2a0a1a; }
+  button:focus-visible { outline: 3px solid #ffd166; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<h1>Three in a Row</h1>
+<div class="status" id="status" role="status">You are X. Your move.</div>
+<div id="board" role="grid" aria-label="Tic tac toe board"></div>
+<div class="row">
+  <button id="modeCpu" type="button" class="on">vs Computer</button>
+  <button id="modeHuman" type="button">2 players</button>
+  <button id="restart" type="button">Restart</button>
+</div>
+<script>
+(function () {
+  'use strict';
+  var WINS = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  var boardEl = document.getElementById('board');
+  var statusEl = document.getElementById('status');
+  var cells = [], turn = 'X', done = false, vsCpu = true, busy = false;
+  var slots = [];
+
+  function build() {
+    boardEl.innerHTML = '';
+    slots = [];
+    for (var i = 0; i < 9; i++) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'slot';
+      b.dataset.i = String(i);
+      b.setAttribute('aria-label', 'Square ' + (i + 1));
+      boardEl.appendChild(b);
+      slots.push(b);
+    }
+    cells = ['', '', '', '', '', '', '', '', ''];
+  }
+
+  function winner(state) {
+    for (var i = 0; i < WINS.length; i++) {
+      var w = WINS[i];
+      if (state[w[0]] && state[w[0]] === state[w[1]] && state[w[0]] === state[w[2]]) return { mark: state[w[0]], line: w };
+    }
+    return state.indexOf('') === -1 ? { mark: 'draw', line: [] } : null;
+  }
+
+  function render(win) {
+    cells.forEach(function (mark, i) {
+      var el = slots[i];
+      el.textContent = mark === 'X' ? '\u00d7' : mark === 'O' ? '\u25cb' : '';
+      el.classList.toggle('taken', !!mark);
+      el.classList.toggle('x', mark === 'X');
+      el.classList.toggle('o', mark === 'O');
+      el.classList.toggle('win', !!(win && win.line.indexOf(i) >= 0));
+      el.disabled = done;
+      el.setAttribute('aria-label', 'Square ' + (i + 1) + (mark ? ', ' + mark : ''));
+    });
+  }
+
+  function finish(win) {
+    done = true;
+    render(win);
+    if (win.mark === 'draw') { statusEl.textContent = 'A draw. Nobody blinked.'; return; }
+    statusEl.textContent = win.mark === 'X' ? 'X wins.' : vsCpu ? 'The computer wins.' : 'O wins.';
+  }
+
+  function bestMove(state) {
+    function score(s, depth) {
+      var w = winner(s);
+      if (w) {
+        if (w.mark === 'draw') return 0;
+        return w.mark === 'O' ? 10 - depth : depth - 10;
+      }
+      var isMax = true;
+      var best = -Infinity;
+      for (var i = 0; i < 9; i++) {
+        if (s[i]) continue;
+        s[i] = 'O';
+        var v = score(s, depth + 1);
+        s[i] = '';
+        if (v > best) best = v;
+      }
+      return best;
+    }
+    var pick = -1, top = -Infinity;
+    var free = [];
+    for (var i = 0; i < 9; i++) if (!state[i]) free.push(i);
+    // A little unpredictability among equally good moves so games are not identical.
+    for (var j = free.length - 1; j > 0; j--) {
+      var k = Math.floor(Math.random() * (j + 1));
+      var t = free[j]; free[j] = free[k]; free[k] = t;
+    }
+    free.forEach(function (i) {
+      state[i] = 'O';
+      var v = score(state, 0);
+      state[i] = '';
+      if (v > top) { top = v; pick = i; }
+    });
+    return pick;
+  }
+
+  function place(i, mark) {
+    if (done || cells[i]) return;
+    cells[i] = mark;
+    var win = winner(cells);
+    if (win) { finish(win); return; }
+    turn = mark === 'X' ? 'O' : 'X';
+    render(null);
+    if (vsCpu && turn === 'O') {
+      busy = true;
+      statusEl.textContent = 'Computer thinking\u2026';
+      setTimeout(function () {
+        var move = bestMove(cells);
+        busy = false;
+        if (move >= 0) place(move, 'O');
+      }, 240);
+    } else {
+      statusEl.textContent = (vsCpu ? 'Your move.' : turn + '\u2019s move.');
+    }
+  }
+
+  boardEl.addEventListener('click', function (e) {
+    var el = e.target.closest('.slot');
+    if (!el || busy || done) return;
+    if (vsCpu && turn !== 'X') return;
+    place(Number(el.dataset.i), turn);
+  });
+
+  function restart() {
+    done = false; busy = false; turn = 'X';
+    build();
+    render(null);
+    statusEl.textContent = vsCpu ? 'You are X. Your move.' : 'X starts.';
+  }
+
+  document.getElementById('restart').addEventListener('click', restart);
+  document.getElementById('modeCpu').addEventListener('click', function () {
+    vsCpu = true;
+    this.classList.add('on');
+    document.getElementById('modeHuman').classList.remove('on');
+    restart();
+  });
+  document.getElementById('modeHuman').addEventListener('click', function () {
+    vsCpu = false;
+    this.classList.add('on');
+    document.getElementById('modeCpu').classList.remove('on');
+    restart();
+  });
+
+  restart();
+})();
+</script>
+</body>
+</html>

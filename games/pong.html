@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Paddle Duel</title>
+<link rel="icon" href="../assets/logo.svg">
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #071b2b; color: #eaf6ff; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; overflow: hidden; }
+  #wrap { position: relative; width: 100%; height: 100%; display: grid; place-items: center; }
+  canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+  .hud { position: absolute; inset: 12px 16px auto; display: flex; justify-content: space-between; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: #9fd4f5; pointer-events: none; }
+  .overlay { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(4,16,26,.78); text-align: center; padding: 24px; }
+  .overlay[hidden] { display: none; }
+  .card { max-width: 380px; }
+  h1 { font-size: 26px; margin: 0 0 8px; }
+  p { margin: 0 0 18px; color: #a8c6da; font-size: 14px; line-height: 1.5; }
+  button { font: inherit; font-weight: 700; padding: 12px 22px; border-radius: 999px; border: 0; cursor: pointer; background: linear-gradient(135deg, #45c8ff, #2b7cff); color: #04131f; }
+  button:focus-visible { outline: 3px solid #9be3ff; outline-offset: 3px; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="cv" aria-label="Paddle duel playfield"></canvas>
+  <div class="hud"><span>You <b id="you">0</b></span><span>First to 7</span><span><b id="cpu">0</b> CPU</span></div>
+  <div class="overlay" id="overlay">
+    <div class="card">
+      <h1>Paddle Duel</h1>
+      <p>Move with the mouse, drag a finger, or use <b>W/S</b> or the arrow keys. Keep the ball past the CPU seven times.</p>
+      <button id="start">Start match</button>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  'use strict';
+  var cv = document.getElementById('cv');
+  var ctx = cv.getContext('2d');
+  var W = 900, H = 560;
+  var overlay = document.getElementById('overlay');
+  var youEl = document.getElementById('you');
+  var cpuEl = document.getElementById('cpu');
+  var PADDLE_H = 96, PADDLE_W = 14, MARGIN = 34;
+  var state = null, running = false, raf = 0, last = 0;
+
+  function fit() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var rect = cv.getBoundingClientRect();
+    cv.width = Math.round(rect.width * dpr);
+    cv.height = Math.round(rect.height * dpr);
+    var sx = cv.width / W, sy = cv.height / H;
+    ctx.setTransform(Math.min(sx, sy), 0, 0, Math.min(sx, sy), 0, 0);
+  }
+
+  function serve(toPlayer) {
+    state.ball.x = W / 2; state.ball.y = H / 2;
+    var dir = toPlayer ? -1 : 1;
+    var angle = (Math.random() * 0.7 - 0.35);
+    state.ball.vx = Math.cos(angle) * 6.2 * dir;
+    state.ball.vy = Math.sin(angle) * 6.2;
+    state.ball.r = 9;
+  }
+
+  function reset() {
+    state = {
+      you: 0, cpu: 0,
+      youY: H / 2, cpuY: H / 2, targetY: H / 2,
+      keys: {}, ball: { x: W / 2, y: H / 2, vx: 0, vy: 0, r: 9 }
+    };
+    youEl.textContent = '0'; cpuEl.textContent = '0';
+    serve(Math.random() < 0.5);
+  }
+
+  function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
+
+  function paddleBounce(paddleY, hitY, dir) {
+    var offset = (hitY - paddleY) / (PADDLE_H / 2);
+    offset = clamp(offset, -1, 1);
+    var speed = Math.min(11.5, Math.hypot(state.ball.vx, state.ball.vy) * 1.045);
+    var angle = offset * 0.9;
+    state.ball.vx = Math.cos(angle) * speed * dir;
+    state.ball.vy = Math.sin(angle) * speed;
+  }
+
+  function point(who) {
+    if (who === 'you') { state.you++; youEl.textContent = state.you; serve(false); }
+    else { state.cpu++; cpuEl.textContent = state.cpu; serve(true); }
+    if (state.you >= 7 || state.cpu >= 7) endMatch();
+  }
+
+  function endMatch() {
+    running = false;
+    cancelAnimationFrame(raf);
+    var won = state.you > state.cpu;
+    overlay.innerHTML = '<div class="card"><h1>' + (won ? 'You win' : 'CPU wins') + '</h1>' +
+      '<p>Final score ' + state.you + ' – ' + state.cpu + '.</p>' +
+      '<button id="again">Play again</button></div>';
+    overlay.hidden = false;
+    document.getElementById('again').addEventListener('click', start);
+    document.getElementById('again').focus();
+  }
+
+  function step(dt) {
+    var speed = 0.55 * dt;
+    if (state.keys.up) state.targetY -= speed;
+    if (state.keys.down) state.targetY += speed;
+    state.targetY = clamp(state.targetY, PADDLE_H / 2, H - PADDLE_H / 2);
+    state.youY += (state.targetY - state.youY) * Math.min(1, 0.28 * dt);
+
+    var aim = state.ball.y + (state.ball.vy > 0 ? 18 : -18);
+    var cpuSpeed = 0.175 * dt * Math.max(0.6, Math.min(1.6, Math.abs(state.ball.vx) / 6));
+    state.cpuY += clamp(aim - state.cpuY, -1, 1) * cpuSpeed * 3.4;
+    state.cpuY = clamp(state.cpuY, PADDLE_H / 2, H - PADDLE_H / 2);
+
+    var b = state.ball;
+    b.x += b.vx * dt; b.y += b.vy * dt;
+    if (b.y < b.r) { b.y = b.r; b.vy = Math.abs(b.vy); }
+    if (b.y > H - b.r) { b.y = H - b.r; b.vy = -Math.abs(b.vy); }
+
+    var youX = MARGIN + PADDLE_W;
+    if (b.vx < 0 && b.x - b.r < youX && b.x > MARGIN - b.r &&
+        Math.abs(b.y - state.youY) < PADDLE_H / 2 + b.r) {
+      b.x = youX + b.r;
+      paddleBounce(state.youY, b.y, 1);
+    }
+    var cpuX = W - MARGIN - PADDLE_W;
+    if (b.vx > 0 && b.x + b.r > cpuX && b.x < W - MARGIN + b.r &&
+        Math.abs(b.y - state.cpuY) < PADDLE_H / 2 + b.r) {
+      b.x = cpuX - b.r;
+      paddleBounce(state.cpuY, b.y, -1);
+    }
+    if (b.x < -b.r * 2) point('cpu');
+    else if (b.x > W + b.r * 2) point('you');
+  }
+
+  function draw() {
+    var rect = cv.getBoundingClientRect();
+    ctx.clearRect(0, 0, W, H);
+    var g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, '#0a2438'); g.addColorStop(1, '#05131f');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+    ctx.strokeStyle = 'rgba(160,220,255,.22)';
+    ctx.lineWidth = 4; ctx.setLineDash([14, 16]);
+    ctx.beginPath(); ctx.moveTo(W / 2, 16); ctx.lineTo(W / 2, H - 16); ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = '#69e0ff';
+    ctx.shadowColor = '#3ec9ff'; ctx.shadowBlur = 18;
+    roundRect(MARGIN, state.youY - PADDLE_H / 2, PADDLE_W, PADDLE_H);
+    ctx.fillStyle = '#9be8ff';
+    roundRect(W - MARGIN - PADDLE_W, state.cpuY - PADDLE_H / 2, PADDLE_W, PADDLE_H);
+    ctx.beginPath(); ctx.arc(state.ball.x, state.ball.y, state.ball.r, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff'; ctx.fill();
+    ctx.shadowBlur = 0;
+    if (rect.width < 10) return;
+  }
+
+  function roundRect(x, y, w, h) {
+    ctx.beginPath();
+    var r = w / 2;
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath(); ctx.fill();
+  }
+
+  function loop(t) {
+    if (!running) return;
+    var dt = Math.min(2.4, (t - last) / 16.67) || 1;
+    last = t;
+    step(dt); draw();
+    raf = requestAnimationFrame(loop);
+  }
+
+  function start() {
+    cancelAnimationFrame(raf);
+    reset(); fit(); draw();
+    overlay.hidden = true;
+    running = true; last = performance.now();
+    raf = requestAnimationFrame(loop);
+  }
+
+  function pointer(clientY) {
+    var rect = cv.getBoundingClientRect();
+    var scale = Math.min(cv.width / W, cv.height / H);
+    var offsetY = (cv.height - H * scale) / 2;
+    var y = (clientY * (cv.height / rect.height) - offsetY) / scale;
+    state.targetY = clamp(y, PADDLE_H / 2, H - PADDLE_H / 2);
+  }
+
+  cv.addEventListener('pointermove', function (e) { if (running) pointer(e.clientY); });
+  cv.addEventListener('pointerdown', function (e) {
+    if (!running) return;
+    cv.setPointerCapture(e.pointerId);
+    pointer(e.clientY);
+  });
+  window.addEventListener('keydown', function (e) {
+    var k = e.key.toLowerCase();
+    if (k === 'arrowup' || k === 'w') { state.keys.up = true; e.preventDefault(); }
+    if (k === 'arrowdown' || k === 's') { state.keys.down = true; e.preventDefault(); }
+    if (k === ' ' && !running) { start(); e.preventDefault(); }
+  });
+  window.addEventListener('keyup', function (e) {
+    var k = e.key.toLowerCase();
+    if (k === 'arrowup' || k === 'w') state.keys.up = false;
+    if (k === 'arrowdown' || k === 's') state.keys.down = false;
+  });
+  window.addEventListener('resize', function () { fit(); if (state) draw(); });
+
+  document.getElementById('start').addEventListener('click', start);
+  reset(); fit(); draw();
+})();
+</script>
+</body>
+</html>

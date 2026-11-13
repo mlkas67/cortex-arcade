@@ -4,34 +4,29 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Play · Cortex Arcade</title>
+<meta name="description" content="Playing a game on Cortex Arcade.">
 <link id="siteFavicon" rel="icon" href="assets/logo.svg">
 <link rel="stylesheet" href="style.css">
 </head>
-<body data-page="play">
+<body data-page="play" data-base="">
+<a class="skip-link" href="#main">Skip to content</a>
 <div class="glow glow-a"></div><div class="glow glow-b"></div>
-
-<div class="chrome-wrap">
-  <div class="chrome" role="navigation" aria-label="Cortex Arcade navigation">
-    <div class="chrome-top">
-      <div class="chrome-dots" aria-hidden="true"><i></i><i></i><i></i></div>
-      <nav class="chrome-tabs">
-        <a class="ctab" href="index.html"><span class="ctab-icon"><img src="assets/logo.svg" alt=""></span><span>Cortex</span></a>
-        <a class="ctab active" href="games.html"><span class="ctab-icon"><span aria-hidden="true">▶</span></span><span>g@m3s</span></a>
-        <a class="ctab" href="settings.html"><span class="ctab-icon" aria-hidden="true">⚙</span><span>Settings</span></a>
-      </nav>
-    </div>
-    <div class="omnibox"><span class="lock" aria-hidden="true">⌁</span><span class="url">cortex<b>·arcade</b>/play</span></div>
+<div class="nav-wrap">
+  <div class="nav" role="navigation" aria-label="Cortex Arcade navigation">
+    <div class="nav-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+    <nav class="tabs">
+      <a class="tab" href="index.html"><span class="tab-icon"><img src="assets/logo.svg" alt=""></span><span>Cortex</span></a>
+      <a class="tab active" href="games.html"><span class="tab-icon"><span class="play-mark" aria-hidden="true">▶</span></span><span>g@m3s</span></a>
+      <a class="tab" href="settings.html"><span class="tab-icon" aria-hidden="true">⚙</span><span>Settings</span></a>
+    </nav>
+    <div class="address"><span class="address-lock" aria-hidden="true">⌁</span><span class="address-text">cortex·arcade</span><span class="address-dot">•</span></div>
   </div>
 </div>
-
-<main class="play" id="play">
-  <div class="play-head">
-    <div>
-      <div class="eyebrow" id="playCategory">Loading…</div>
-      <h1 id="playName">Loading…</h1>
-    </div>
-    <div class="play-actions">
-      <a class="btn btn-ghost" href="games.html" id="playBack">← All games</a>
+<main class="play-main" id="main">
+  <div class="game-top">
+    <h1 class="game-title" id="playName">Loading…<small id="playCategory">…</small></h1>
+    <div class="game-actions">
+      <a class="btn btn-ghost" href="games.html" id="playBack">← All g@m3s</a>
       <button class="btn btn-ghost" type="button" id="playReload">Reload</button>
       <button class="btn btn-primary" type="button" id="playFull">Fullscreen</button>
     </div>
@@ -39,13 +34,8 @@
   <div class="stage" id="stage">
     <iframe id="gameFrame" src="about:blank" title="Game area" allow="autoplay; fullscreen; gamepad; pointer-lock" allowfullscreen></iframe>
   </div>
-  <p class="play-note">Keyboard: arrows or WASD move, space acts, R restarts. Click the frame if keys are not responding.</p>
+  <p class="play-note">Keyboard: arrows or WASD to move, space to act, R to restart. Click the frame if keys are not responding.</p>
 </main>
-
-<footer class="foot">
-  <span>Cortex Arcade — an original browser arcade.</span>
-  <span><a href="games.html">All games</a></span>
-</footer>
 
 <script src="js/catalog.js"></script>
 <script src="js/core.js"></script>
