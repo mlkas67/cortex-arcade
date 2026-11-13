@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="../assets/logo.svg">
+<title>Reaction Grid</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: #07100c; color: #fff; font-family: Inter, system-ui, sans-serif; }
+  .app { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 16px; }
+  .top { width: min(94vw, 620px); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .stats { display: flex; gap: 8px; }
+  .stat { background: #0f201a; border: 1px solid #ffffff1f; border-radius: 12px; padding: 7px 14px; text-align: center; }
+  .stat span { display: block; font-size: 10px; letter-spacing: .12em; color: #7fae9a; }
+  .stat b { font-size: 19px; }
+  button { border: 0; border-radius: 11px; font: inherit; font-size: 13px; font-weight: 700; padding: 10px 16px; cursor: pointer; background: #36d48b; color: #04120b; }
+  button.ghost { background: #12251e; color: #cfe9dd; border: 1px solid #ffffff1f; }
+  button:hover { filter: brightness(1.08); }
+  .board { position: relative; width: min(94vw, 620px); }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .cell { aspect-ratio: 1; border-radius: 18px; background: #101d18; border: 1px solid #ffffff14; cursor: pointer; display: grid; place-items: center; font-size: 13px; color: #4f7a67; letter-spacing: .08em; transition: background .1s, transform .1s; }
+  .cell.lit { background: radial-gradient(circle at 50% 40%, #7dffc0, #13a86a); border-color: #7dffc0; color: #04120b; font-weight: 800; transform: scale(.97); box-shadow: 0 0 40px #36d48b88; }
+  .cell.wrong { background: #3a1220; border-color: #ff5f8f; }
+  .cell.react { background: #2a3f1c; border-color: #a4e04a; }
+  .overlay { position: absolute; inset: 0; display: grid; place-items: center; background: #07100ce6; border-radius: 18px; text-align: center; padding: 22px; backdrop-filter: blur(4px); }
+  .overlay[hidden] { display: none; }
+  .overlay h1 { margin: 0 0 8px; font-size: 26px; }
+  .overlay p { margin: 0 0 16px; color: #9fc7b4; font-size: 14px; line-height: 1.6; }
+  .badge { display: inline-block; background: #12251e; border: 1px solid #ffffff1f; border-radius: 999px; padding: 5px 12px; font-size: 12px; color: #a9cfbd; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="stats">
+      <div class="stat"><span>SCORE</span><b id="score">0</b></div>
+      <div class="stat"><span>BEST</span><b id="best">0</b></div>
+      <div class="stat"><span>TIME</span><b id="time">30</b></div>
+    </div>
+    <button class="ghost" id="newGame" type="button">Restart</button>
+  </div>
+  <div class="board">
+    <div class="grid" id="grid" aria-label="Reaction grid"></div>
+    <div class="overlay" id="overlay">
+      <div>
+        <span class="badge">9 squares · 30 seconds</span>
+        <h1>Reaction Grid</h1>
+        <p>Hit the glowing square before it moves on.<br>Every hit is worth points — the faster you are, the more you get. Wrong square costs you.</p>
+        <button id="startBtn" type="button">Start</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  'use strict';
+  var grid = document.getElementById('grid');
+  var scoreEl = document.getElementById('score');
+  var bestEl = document.getElementById('best');
+  var timeEl = document.getElementById('time');
+  var overlay = document.getElementById('overlay');
+  var startBtn = document.getElementById('startBtn');
+
+  var CELLS = 9;
+  var DURATION = 30;
+  var best = Number(localStorage.getItem('cx_reaction_best') || 0);
+  bestEl.textContent = best;
+
+  var cellEls = [];
+  var lit = -1, litAt = 0, showsLeft = 0, score = 0, timeLeft = DURATION, playing = false;
+  var tickTimer = null, switchTimer = null;
+
+  for (var i = 0; i < CELLS; i++) {
+    var c = document.createElement('div');
+    c.className = 'cell';
+    c.dataset.i = String(i);
+    c.setAttribute('role', 'button');
+    c.setAttribute('tabindex', '0');
+    c.textContent = 'TAP';
+    grid.appendChild(c);
+    cellEls.push(c);
+  }
+
+  function clearTimers() {
+    clearInterval(tickTimer);
+    clearTimeout(switchTimer);
+  }
+
+  function start() {
+    clearTimers();
+    score = 0; timeLeft = DURATION; playing = true;
+    scoreEl.textContent = '0';
+    timeEl.textContent = String(DURATION);
+    overlay.hidden = true;
+    showLit();
+    tickTimer = setInterval(function () {
+      timeLeft -= 1;
+      timeEl.textContent = String(timeLeft);
+      if (timeLeft <= 0) finish();
+    }, 1000);
+  }
+
+  function showLit() {
+    if (!playing) return;
+    var next = Math.floor(Math.random() * CELLS);
+    if (next === lit) next = (next + 1 + Math.floor(Math.random() * (CELLS - 1))) % CELLS;
+    if (lit >= 0) cellEls[lit].classList.remove('lit');
+    lit = next;
+    litAt = performance.now();
+    cellEls[lit].classList.add('lit');
+    showsLeft -= 1;
+    switchTimer = setTimeout(showLit, 620 + Math.random() * 380);
+  }
+
+  function flash(el, cls) {
+    el.classList.add(cls);
+    setTimeout(function () { el.classList.remove(cls); }, 240);
+  }
+
+  function hit(el) {
+    if (!playing) return;
+    var i = Number(el.dataset.i);
+    if (i !== lit) {
+      score = Math.max(0, score - 5);
+      scoreEl.textContent = String(score);
+      flash(el, 'wrong');
+      return;
+    }
+    var ms = performance.now() - litAt;
+    var points = Math.max(5, Math.round(120 - ms / 6));
+    score += points;
+    scoreEl.textContent = String(score);
+    flash(el, 'react');
+    el.classList.remove('lit');
+    lit = -1;
+  }
+
+  function finish() {
+    playing = false;
+    clearTimers();
+    if (lit >= 0) cellEls[lit].classList.remove('lit');
+    lit = -1;
+    if (score > best) { best = score; bestEl.textContent = best; try { localStorage.setItem('cx_reaction_best', String(best)); } catch (e) { /* ignore */ } }
+    overlay.hidden = false;
+    overlay.innerHTML = '<div><span class="badge">Time up</span><h1>' + score + ' points</h1>' +
+      '<p>' + (score >= best && score > 0 ? 'That is your best run yet.' : 'Your best is ' + best + '.') + '</p>' +
+      '<button id="startBtn" type="button">Play again</button></div>';
+    overlay.querySelector('#startBtn').addEventListener('click', start);
+  }
+
+  grid.addEventListener('pointerdown', function (e) {
+    var el = e.target.closest('.cell');
+    if (el) hit(el);
+  });
+  grid.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    var el = e.target.closest('.cell');
+    if (el) { e.preventDefault(); hit(el); }
+  });
+
+  startBtn.addEventListener('click', start);
+  document.getElementById('newGame').addEventListener('click', start);
+})();
+</script>
+</body>
+</html>

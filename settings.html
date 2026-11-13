@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Settings · Cortex Arcade</title>
+<link id="siteFavicon" rel="icon" href="assets/logo.svg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-page="settings">
+<div class="glow glow-a"></div><div class="glow glow-b"></div>
+
+<div class="chrome-wrap">
+  <div class="chrome" role="navigation" aria-label="Cortex Arcade navigation">
+    <div class="chrome-top">
+      <div class="chrome-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+      <nav class="chrome-tabs">
+        <a class="ctab" href="index.html"><span class="ctab-icon"><img src="assets/logo.svg" alt=""></span><span>Cortex</span></a>
+        <a class="ctab" href="games.html"><span class="ctab-icon"><span aria-hidden="true">▶</span></span><span>g@m3s</span></a>
+        <a class="ctab active" href="settings.html"><span class="ctab-icon" aria-hidden="true">⚙</span><span>Settings</span></a>
+      </nav>
+    </div>
+    <div class="omnibox"><span class="lock" aria-hidden="true">⌁</span><span class="url">cortex<b>·arcade</b>/settings</span></div>
+  </div>
+</div>
+
+<main class="wrap" style="max-width:880px">
+  <div class="eyebrow">Customization</div>
+  <h1>Settings</h1>
+  <p class="lead">Change the tab title and icon, pick a colour theme, and choose how the background behaves.</p>
+
+  <section class="panel" style="margin-top:24px">
+    <label class="field">Tab title
+      <input id="tabTitle" type="text" maxlength="80" placeholder="Cortex Arcade" autocomplete="off">
+    </label>
+    <p class="help">Shown in the browser tab on every page of the arcade.</p>
+
+    <label class="field" style="margin-top:18px">Colour theme</label>
+    <div class="theme-grid" role="group" aria-label="Colour themes">
+      <button type="button" class="theme-btn" data-theme-choice="pink"><i class="swatch" style="background:#ff3d9f"></i><span>Pink</span></button>
+      <button type="button" class="theme-btn" data-theme-choice="purple"><i class="swatch" style="background:#a86bff"></i><span>Purple</span></button>
+      <button type="button" class="theme-btn" data-theme-choice="blue"><i class="swatch" style="background:#39a8ff"></i><span>Blue</span></button>
+      <button type="button" class="theme-btn" data-theme-choice="green"><i class="swatch" style="background:#36d48b"></i><span>Green</span></button>
+      <button type="button" class="theme-btn" data-theme-choice="orange"><i class="swatch" style="background:#ff8a2a"></i><span>Orange</span></button>
+      <button type="button" class="theme-btn" data-theme-choice="mono"><i class="swatch" style="background:#ededed"></i><span>Mono</span></button>
+    </div>
+
+    <label class="field" style="margin-top:18px">Tab icon presets</label>
+    <div class="icon-grid" role="group" aria-label="Preset tab icons">
+      <button type="button" class="icon-btn" data-icon="assets/icon-drive.svg" data-icon-name="Drive"><img src="assets/icon-drive.svg" alt=""><span>Drive</span></button>
+      <button type="button" class="icon-btn" data-icon="assets/icon-classroom.svg" data-icon-name="Class"><img src="assets/icon-classroom.svg" alt=""><span>Class</span></button>
+      <button type="button" class="icon-btn" data-icon="assets/icon-docs.svg" data-icon-name="Docs"><img src="assets/icon-docs.svg" alt=""><span>Docs</span></button>
+      <button type="button" class="icon-btn" data-icon="assets/icon-music.svg" data-icon-name="Music"><img src="assets/icon-music.svg" alt=""><span>Music</span></button>
+    </div>
+
+    <label class="field" style="margin-top:18px">Custom tab icon
+      <input id="tabIcon" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml,image/x-icon">
+    </label>
+    <p class="help">Preset icons apply immediately. An uploaded image is saved to this browser when you press Save and replaces the icon on every page. The default is the Cortex logo.</p>
+  </section>
+
+  <section class="panel">
+    <div class="switch-row">
+      <div><strong>Falling balls background</strong><p>Slow drifting neon balls behind the page.</p></div>
+      <button type="button" class="toggle" id="toggleBalls" role="switch" aria-checked="true" aria-label="Falling balls background"></button>
+    </div>
+    <div class="switch-row">
+      <div><strong>Suggest games while typing</strong><p>Show a dropdown of matches under the search box.</p></div>
+      <button type="button" class="toggle" id="toggleSuggest" role="switch" aria-checked="true" aria-label="Suggest games while typing"></button>
+    </div>
+  </section>
+
+  <div class="actions">
+    <button type="button" class="btn btn-primary" id="saveSettings">Save</button>
+    <button type="button" class="btn btn-ghost" id="resetSettings">Reset everything</button>
+    <span class="status" id="settingsStatus" role="status"></span>
+  </div>
+</main>
+
+<footer class="foot">
+  <span>Cortex Arcade — an original browser arcade.</span>
+  <span><a href="index.html">Home</a> · <a href="games.html">All games</a></span>
+</footer>
+
+<script src="js/catalog.js"></script>
+<script src="js/core.js"></script>
+<script src="js/settings.js"></script>
+</body>
+</html>
