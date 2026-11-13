@@ -195,6 +195,10 @@
     }
   });
 
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) togglePause();
+  });
+
   var touchStart = null;
   canvas.addEventListener('touchstart', function (e) {
     var t = e.changedTouches[0];

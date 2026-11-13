@@ -87,20 +87,20 @@
   }
 
   function bestMove(state) {
-    function score(s, depth) {
+    // Full minimax: O maximises, X minimises, so every X reply is simulated.
+    function score(s, depth, turn) {
       var w = winner(s);
       if (w) {
         if (w.mark === 'draw') return 0;
         return w.mark === 'O' ? 10 - depth : depth - 10;
       }
-      var isMax = true;
-      var best = -Infinity;
+      var best = turn === 'O' ? -Infinity : Infinity;
       for (var i = 0; i < 9; i++) {
         if (s[i]) continue;
-        s[i] = 'O';
-        var v = score(s, depth + 1);
+        s[i] = turn;
+        var v = score(s, depth + 1, turn === 'O' ? 'X' : 'O');
         s[i] = '';
-        if (v > best) best = v;
+        if (turn === 'O' ? v > best : v < best) best = v;
       }
       return best;
     }
@@ -114,7 +114,7 @@
     }
     free.forEach(function (i) {
       state[i] = 'O';
-      var v = score(state, 0);
+      var v = score(state, 0, 'X');
       state[i] = '';
       if (v > top) { top = v; pick = i; }
     });

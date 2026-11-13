@@ -141,7 +141,8 @@
     if (opened === cells.length - MINES) {
       over = true;
       stopTimer();
-      cells.forEach(function (c) { if (c.mine && !c.flag) { c.flag = true; paint(c); } });
+      cells.forEach(function (c) { if (c.mine && !c.flag) { c.flag = true; flags++; paint(c); } });
+      minesLeftEl.textContent = '0';
       msg.textContent = 'Cleared in ' + seconds + 's. All mines found.';
       msg.className = 'msg win';
     }
@@ -150,6 +151,7 @@
   function toggleFlag(i) {
     var cell = cells[i];
     if (cell.open || over) return;
+    if (!cell.flag && flags >= MINES) return;
     cell.flag = !cell.flag;
     flags += cell.flag ? 1 : -1;
     minesLeftEl.textContent = String(MINES - flags);
